@@ -19,10 +19,10 @@ jobs:
     strategy:
       matrix:
         include:
-          # Flutter 3.47 requires minSdk 24, so the app cannot be installed on older emulators.
+          # Flutter 3.47 requires minSdk 24 and no longer supports 32-bit x86 Android.
           - api-level: 24
             target: default
-            arch: x86
+            arch: x86_64
           - api-level: 34
             target: google_apis
             arch: x86_64
@@ -70,7 +70,8 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
-          script: flutter test integration_test
+          # Target the emulator explicitly so the test never falls back to the Linux desktop device.
+          script: flutter test integration_test -d emulator-5554
           working-directory: flutter_secure_storage/example
   drive_ios:
     name: iOS
@@ -90,10 +91,12 @@ jobs:
       - name: Initialize workspace through melos
         run: melos bootstrap
       - uses: futureware-tech/simulator-action@v4
+        id: simulator
         with:
           os: iOS
           os_version: ">=18.1"
-          model: "iPhone 16"
+          model: "iPhone 17"
       - name: Run Flutter Integration tests
         working-directory: flutter_secure_storage/example
-        run: flutter test integration_test
+        # Target the simulator explicitly so the test never falls back to the macOS desktop device.
+        run: flutter test integration_test -d ${{ steps.simulator.outputs.udid }}
