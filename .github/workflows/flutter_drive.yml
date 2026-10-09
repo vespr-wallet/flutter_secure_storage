@@ -64,6 +64,10 @@ jobs:
           echo "$HOME/AppData/Local/Pub/Cache/bin" >> $GITHUB_PATH
       - name: Initialize workspace through melos
         run: melos bootstrap
+      # Do the heavy first Gradle/NDK build before the emulator boots, so it doesn't compete with it for CPU.
+      - name: Build example APK
+        working-directory: flutter_secure_storage/example
+        run: flutter build apk --debug
       - name: Run Flutter Integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -71,10 +75,11 @@ jobs:
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
           # Target the emulator explicitly so the test never falls back to the Linux desktop device.
-          # On failure, print the relevant logcat lines (plugin/keystore errors) to aid debugging.
+          # Cap the run so a hung install/launch fails with logs instead of hitting the job timeout.
+          # On failure, print the relevant logcat lines (plugin/keystore/install errors) to aid debugging.
           script: |
             adb logcat -c
-            flutter test integration_test -d emulator-5554 || { adb logcat -d -v time | grep -iE 'flutter|securestorage|sharedpref|keystore|tink|crypto|AndroidRuntime|FATAL' | tail -n 400; exit 1; }
+            timeout 600 flutter test integration_test -d emulator-5554 || { adb logcat -d -v time | grep -iE 'flutter|securestorage|sharedpref|keystore|tink|crypto|AndroidRuntime|FATAL|PackageManager|installd|dex2oat' | tail -n 400; exit 1; }
           working-directory: flutter_secure_storage/example
   drive_ios:
     name: iOS
