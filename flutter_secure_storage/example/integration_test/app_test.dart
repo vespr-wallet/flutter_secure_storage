@@ -4,6 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Secure Storage Example', (WidgetTester tester) async {
+    // Use the fake text input: with the real IME connected, enterText only
+    // updates the framework and the IME can sync the old text back before Save.
+    tester.testTextInput.register();
+    addTearDown(tester.testTextInput.unregister);
+
     await tester.pumpWidget(const MaterialApp(home: ItemsWidget()));
     await tester.pumpAndSettle();
 
@@ -12,44 +17,44 @@ void main() {
     await pageObject.deleteAll();
     pageObject.hasNoRow(0);
 
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
 
     await pageObject.addRandom();
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
     pageObject.hasRow(0);
     await pageObject.addRandom();
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
     pageObject.hasRow(1);
 
     await pageObject.editRow('Row 0', 0);
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
     await pageObject.editRow('Row 1', 1);
 
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
 
     pageObject.rowHasTitle('Row 0', 0);
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
     pageObject.rowHasTitle('Row 1', 1);
 
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
 
     await pageObject.deleteRow(1);
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
     pageObject.hasNoRow(1);
 
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
 
     pageObject.rowHasTitle('Row 0', 0);
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
     await pageObject.deleteRow(0);
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
     pageObject.hasNoRow(0);
 
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
 
     await pageObject.isProtectedDataAvailable();
 
-    await Future.delayed(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
 
     await pageObject.deleteAll();
   });
@@ -99,6 +104,10 @@ class HomePageObject {
 
     await tester.enterText(textFieldFinder, title);
     await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: textFieldFinder, matching: find.text(title)),
+      findsOneWidget,
+    );
 
     final Finder saveButtonFinder = find.byKey(const Key('save'));
     expect(saveButtonFinder, findsOneWidget);

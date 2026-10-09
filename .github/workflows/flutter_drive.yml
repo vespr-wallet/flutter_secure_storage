@@ -19,9 +19,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - api-level: 21
+          # API 26 is the VESPR app's minSdk (Flutter 3.47 also no longer supports 32-bit x86 Android).
+          - api-level: 26
             target: default
-            arch: x86
+            arch: x86_64
           - api-level: 34
             target: google_apis
             arch: x86_64
@@ -45,7 +46,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.22.x
+          flutter-version: 3.47.x
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
@@ -63,13 +64,22 @@ jobs:
           echo "$HOME/AppData/Local/Pub/Cache/bin" >> $GITHUB_PATH
       - name: Initialize workspace through melos
         run: melos bootstrap
+      # Do the heavy first Gradle/NDK build before the emulator boots, so it doesn't compete with it for CPU.
+      - name: Build example APK
+        working-directory: flutter_secure_storage/example
+        run: flutter build apk --debug
       - name: Run Flutter Integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
-          script: flutter test integration_test
+          # Target the emulator explicitly so the test never falls back to the Linux desktop device.
+          # Cap the run so a hung install/launch fails with logs instead of hitting the job timeout.
+          # On failure, print the relevant logcat lines (plugin/keystore/install errors) to aid debugging.
+          script: |
+            adb logcat -c || true
+            timeout 600 flutter test integration_test -d emulator-5554 || { adb logcat -d -v time | grep -iE 'flutter|securestorage|sharedpref|keystore|tink|crypto|AndroidRuntime|FATAL|PackageManager|installd|dex2oat' | tail -n 400; exit 1; }
           working-directory: flutter_secure_storage/example
   drive_ios:
     name: iOS
@@ -80,7 +90,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.27.x
+          flutter-version: 3.47.x
       - name: Install melos
         run: |
           flutter pub global activate melos
@@ -88,11 +98,20 @@ jobs:
           echo "$HOME/AppData/Local/Pub/Cache/bin" >> $GITHUB_PATH
       - name: Initialize workspace through melos
         run: melos bootstrap
+      # Run the project migrations (SPM, deployment target) and the first Xcode build before the
+      # simulator boots, so the test step only does an incremental build on an idle machine.
+      - name: Build example iOS app
+        working-directory: flutter_secure_storage/example
+        run: flutter build ios --simulator --debug
       - uses: futureware-tech/simulator-action@v4
+        id: simulator
         with:
           os: iOS
           os_version: ">=18.1"
-          model: "iPhone 16"
+          model: "iPhone 17"
+      - name: Wait for the simulator to finish booting
+        run: xcrun simctl bootstatus ${{ steps.simulator.outputs.udid }} -b
       - name: Run Flutter Integration tests
         working-directory: flutter_secure_storage/example
-        run: flutter test integration_test
+        # Target the simulator explicitly so the test never falls back to the macOS desktop device.
+        run: flutter test integration_test -d ${{ steps.simulator.outputs.udid }}
