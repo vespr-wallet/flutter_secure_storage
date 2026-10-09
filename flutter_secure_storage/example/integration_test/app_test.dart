@@ -4,6 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Secure Storage Example', (WidgetTester tester) async {
+    // Use the fake text input: with the real IME connected, enterText only
+    // updates the framework and the IME can sync the old text back before Save.
+    tester.testTextInput.register();
+    addTearDown(tester.testTextInput.unregister);
+
     await tester.pumpWidget(const MaterialApp(home: ItemsWidget()));
     await tester.pumpAndSettle();
 
@@ -99,6 +104,10 @@ class HomePageObject {
 
     await tester.enterText(textFieldFinder, title);
     await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: textFieldFinder, matching: find.text(title)),
+      findsOneWidget,
+    );
 
     final Finder saveButtonFinder = find.byKey(const Key('save'));
     expect(saveButtonFinder, findsOneWidget);
