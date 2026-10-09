@@ -141,8 +141,12 @@ class FlutterSecureStorage {
         }
 
         // First, query without synchronizable, then with synchronizable if no value is found.
+        // Errors from the first query (e.g. errSecInteractionNotAllowed while the device is locked) are returned as-is.
         let responseWithoutSynchronizable = readValue(synchronizable: nil)
-        return responseWithoutSynchronizable.value != nil ? responseWithoutSynchronizable : readValue(synchronizable: true)
+        if responseWithoutSynchronizable.status != errSecSuccess || responseWithoutSynchronizable.value != nil {
+            return responseWithoutSynchronizable
+        }
+        return readValue(synchronizable: true)
     }
 
     internal func deleteAll(groupId: String?, accountName: String?, synchronizable: Bool?, accessibility: String?) -> FlutterSecureStorageResponse {
