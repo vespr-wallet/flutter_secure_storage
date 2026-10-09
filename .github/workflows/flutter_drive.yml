@@ -98,12 +98,19 @@ jobs:
           echo "$HOME/AppData/Local/Pub/Cache/bin" >> $GITHUB_PATH
       - name: Initialize workspace through melos
         run: melos bootstrap
+      # Run the project migrations (SPM, deployment target) and the first Xcode build before the
+      # simulator boots, so the test step only does an incremental build on an idle machine.
+      - name: Build example iOS app
+        working-directory: flutter_secure_storage/example
+        run: flutter build ios --simulator --debug
       - uses: futureware-tech/simulator-action@v4
         id: simulator
         with:
           os: iOS
           os_version: ">=18.1"
           model: "iPhone 17"
+      - name: Wait for the simulator to finish booting
+        run: xcrun simctl bootstatus ${{ steps.simulator.outputs.udid }} -b
       - name: Run Flutter Integration tests
         working-directory: flutter_secure_storage/example
         # Target the simulator explicitly so the test never falls back to the macOS desktop device.
