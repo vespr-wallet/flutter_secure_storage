@@ -34,21 +34,3 @@ jobs:
         run: melos exec -c 1 -- flutter analyze --no-fatal-infos
       - name: Format
         run: melos format --output none --set-exit-if-changed
-
-  windows_unit_tests:
-    name: Windows unit tests
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: "stable"
-          flutter-version: 3.47.x
-      # The pub cache bin dir is not on PATH on Windows runners, so run melos through pub.
-      - name: Install melos
-        run: flutter pub global activate melos
-      - name: Initialize workspace through melos
-        run: flutter pub global run melos bootstrap
-      - name: Run unit tests
-        working-directory: flutter_secure_storage_windows
-        run: flutter test

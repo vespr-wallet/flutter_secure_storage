@@ -25,7 +25,8 @@ val flutterVersionName: String = localProperties.getProperty("flutter.versionNam
 android {
     namespace = "com.it_nomads.fluttersecurestorageexample"
 
-    compileSdk = 34
+    compileSdk = 36
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
