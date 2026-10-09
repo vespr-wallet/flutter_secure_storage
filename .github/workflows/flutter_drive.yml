@@ -19,7 +19,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - api-level: 21
+          # Flutter 3.47 requires minSdk 24, so the app cannot be installed on older emulators.
+          - api-level: 24
             target: default
             arch: x86
           - api-level: 34
@@ -45,7 +46,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.22.x
+          flutter-version: 3.47.x
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
@@ -80,7 +81,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.27.x
+          flutter-version: 3.47.x
       - name: Install melos
         run: |
           flutter pub global activate melos
