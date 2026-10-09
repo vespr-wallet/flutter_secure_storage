@@ -14,7 +14,7 @@ flutter:
         package: com.it_nomads.fluttersecurestorage
         pluginClass: FlutterSecureStoragePlugin
       ios:
-        pluginClass: FlutterSecureStoragePlugin
+        pluginClass: SwiftFlutterSecureStoragePlugin
       linux:
         default_package: flutter_secure_storage_linux
       macos:
