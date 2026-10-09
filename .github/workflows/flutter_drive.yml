@@ -19,8 +19,8 @@ jobs:
     strategy:
       matrix:
         include:
-          # Flutter 3.47 requires minSdk 24 and no longer supports 32-bit x86 Android.
-          - api-level: 24
+          # API 26 is the VESPR app's minSdk (Flutter 3.47 also no longer supports 32-bit x86 Android).
+          - api-level: 26
             target: default
             arch: x86_64
           - api-level: 34
