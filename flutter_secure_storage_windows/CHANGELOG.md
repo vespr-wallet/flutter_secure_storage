@@ -1,3 +1,6 @@
+## 3.1.2+vespr.1
+* Supports win32 6 (`win32: ^6.0.1`), with call sites adapted. The pubspec version is unchanged.
+
 ## 3.1.2
 Reverts onCupertinoProtectedDataAvailabilityChanged and isCupertinoProtectedDataAvailable.
 
