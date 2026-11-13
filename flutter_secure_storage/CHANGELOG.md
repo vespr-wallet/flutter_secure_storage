@@ -1,3 +1,13 @@
+## Unreleased
+* Tooling: CI runs on Flutter 3.47, and the example app builds with the matching Android Gradle setup. The package code is unchanged.
+
+## 9.2.4+vespr.1
+VESPR fork of 9.2.4, kept on the 9.x line (tag `v9.2.4+vespr.1`). The pubspec version is unchanged.
+* [Windows] Uses `flutter_secure_storage_windows` with win32 6 support (see its 3.1.2+vespr.1 entry).
+* [iOS] Swift Package Manager support (packaging only, no keychain code change; CocoaPods still works). The Swift package's minimum is iOS 15.
+* [iOS] `read()` returns keychain errors (for example `errSecInteractionNotAllowed` while the device is locked) instead of a successful `null`. The synchronizable fallback query only runs when the first query succeeds with no value, so "locked" is no longer confused with "key does not exist".
+* [iOS] Keychain operations run on one private serial queue instead of the concurrent global queue, so overlapping calls no longer race each other. Results are still delivered on the main queue.
+
 ## 9.2.4
 * [Android] Fix errors when building for release by upgrading Tink to 1.9.0.
 * [iOS] Fix delete and deleteAll when synchronizable is set.
