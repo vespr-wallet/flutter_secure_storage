@@ -14,11 +14,11 @@ jobs:
     name: Analysis & Formatting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
-          flutter-version: 3.47.x
+          flutter-version: 3.50.0
       - name: Version
         run: flutter doctor -v
       - name: Install melos

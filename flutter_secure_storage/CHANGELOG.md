@@ -1,5 +1,6 @@
 ## Unreleased
 * Tooling: CI runs on Flutter 3.47, and the example app builds with the matching Android Gradle setup. The package code is unchanged.
+* Tooling: CI runs on Flutter 3.50.0, with `actions/checkout@v7`, `actions/setup-java@v6`, `futureware-tech/simulator-action@v6` and `actions/stale@v11`.
 
 ## 9.2.4+vespr.1
 VESPR fork of 9.2.4, kept on the 9.x line (tag `v9.2.4+vespr.1`). The pubspec version is unchanged.
