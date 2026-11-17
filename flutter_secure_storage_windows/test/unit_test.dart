@@ -16,7 +16,7 @@ import 'package:path_provider/path_provider.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  FutureOr<void> cleanUpFiles() async {
+  Future<void> cleanUpFiles() async {
     // Clean up current & legacy files.
     final directory = await getApplicationSupportDirectory();
     if (directory.existsSync()) {
@@ -1013,7 +1013,7 @@ void main() {
   group('Stub does not work at all', () {
     test(
       'constructor',
-      () async {
+      () {
         expect(
           () => stub.FlutterSecureStorageWindows(),
           throwsAssertionError,
@@ -1149,7 +1149,7 @@ bool canTest() {
   return true;
 }
 
-FutureOr<void> withFfi(
+Future<void> withFfi(
   FutureOr<void> Function() test,
 ) async {
   if (!canTest()) {
