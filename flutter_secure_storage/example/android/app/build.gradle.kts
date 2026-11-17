@@ -4,7 +4,7 @@ import java.nio.file.Path
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    // The Flutter Gradle Plugin applies the Kotlin Gradle Plugin while android.builtInKotlin=false.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -33,10 +33,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-
     sourceSets {
         named("main") {
             java.srcDir("src/main/kotlin")
@@ -57,6 +53,12 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
