@@ -48,7 +48,7 @@ class FlutterSecureStorageWindows extends FlutterSecureStoragePlatform {
     }
 
     if (options.useBackwardCompatibility) {
-      return _backwardCompatible.containsKey(key: key, options: options);
+      return await _backwardCompatible.containsKey(key: key, options: options);
     }
 
     return false;
@@ -169,8 +169,8 @@ FlutterSecureStorageWindows createFlutterSecureStorageWindows(
 @visibleForTesting
 abstract class MapStorage {
   FutureOr<Map<String, String>> load(Map<String, String> options);
-  FutureOr<void> save(Map<String, String> data, Map<String, String> options);
-  FutureOr<void> clear(Map<String, String> options);
+  Future<void> save(Map<String, String> data, Map<String, String> options);
+  Future<void> clear(Map<String, String> options);
 }
 
 @visibleForTesting
@@ -260,7 +260,7 @@ class DpapiJsonFileMapStorage extends MapStorage {
                 LocalFree(HLOCAL(plainTextBlob.ref.pbData.cast()));
             if (localFreeResult.value.address != NULL) {
               debugPrint(
-                'load: Failed to LocalFree with: 0x${localFreeResult.error.toHexString(32)}',
+                'load: Failed to LocalFree with: 0x${localFreeResult.error.toHexString()}',
               );
             }
           }
@@ -310,7 +310,7 @@ class DpapiJsonFileMapStorage extends MapStorage {
   }
 
   @override
-  FutureOr<void> save(
+  Future<void> save(
     Map<String, String> data,
     Map<String, String> options,
   ) async {
@@ -379,7 +379,7 @@ class DpapiJsonFileMapStorage extends MapStorage {
               LocalFree(HLOCAL(encryptedTextBlob.ref.pbData.cast()));
           if (localFreeResult.value.address != NULL) {
             debugPrint(
-              'save: Failed to LocalFree with: 0x${localFreeResult.error.toHexString(32)}',
+              'save: Failed to LocalFree with: 0x${localFreeResult.error.toHexString()}',
             );
           }
         }
@@ -388,7 +388,7 @@ class DpapiJsonFileMapStorage extends MapStorage {
   }
 
   @override
-  FutureOr<void> clear(Map<String, String> options) async {
+  Future<void> clear(Map<String, String> options) async {
     final file = File(await _getJsonFilePath());
     if (await file.exists()) {
       try {

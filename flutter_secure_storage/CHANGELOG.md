@@ -1,6 +1,7 @@
 ## Unreleased
 * Tooling: CI runs on Flutter 3.47, and the example app builds with the matching Android Gradle setup. The package code is unchanged.
 * Tooling: CI runs on Flutter 3.50.0, with `actions/checkout@v7`, `actions/setup-java@v6`, `futureware-tech/simulator-action@v6` and `actions/stale@v11`.
+* Tooling: CI lint fails on info-level issues too, and the workspace is clean on Flutter 3.50.0: mechanical lint and deprecation fixes in this package, `flutter_secure_storage_platform_interface`, `flutter_secure_storage_web` (`Storage.getItem`/`setItem` instead of the deprecated `[]`/`[]=`, which call them) and `flutter_secure_storage_windows`, and the example apps import `package:material_ui`. Storage behaviour is unchanged.
 
 ## 9.2.4+vespr.1
 VESPR fork of 9.2.4, kept on the 9.x line (tag `v9.2.4+vespr.1`). The pubspec version is unchanged.

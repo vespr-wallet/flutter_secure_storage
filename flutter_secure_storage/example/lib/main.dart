@@ -2,8 +2,8 @@ import 'dart:io' show Platform;
 import 'dart:math' show Random;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   runApp(const MaterialApp(home: ItemsWidget()));

@@ -1,5 +1,5 @@
 /// Web library for flutter_secure_storage
-library flutter_secure_storage_web;
+library;
 
 import 'dart:convert';
 import 'dart:js_interop' as js_interop;
@@ -72,9 +72,10 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
     required String key,
     required Map<String, String> options,
   }) async {
-    final value = web.window.localStorage["${options[_publicKey]!}.$key"];
+    final value =
+        web.window.localStorage.getItem("${options[_publicKey]!}.$key");
 
-    return _decryptValue(value, options);
+    return await _decryptValue(value, options);
   }
 
   /// Decrypts and returns all keys with associated values.
@@ -116,7 +117,7 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
     final useWrapKey = options[_wrapKey]?.isNotEmpty ?? false;
 
     if (web.window.localStorage.has(key)) {
-      final jwk = base64Decode(web.window.localStorage[key]!);
+      final jwk = base64Decode(web.window.localStorage.getItem(key)!);
 
       if (useWrapKey) {
         final unwrappingKey = await _getWrapKey(options);
@@ -166,8 +167,11 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
             .toDart;
       }
 
-      web.window.localStorage[key] = base64Encode(
-        (jsonWebKey! as js_interop.JSArrayBuffer).toDart.asUint8List(),
+      web.window.localStorage.setItem(
+        key,
+        base64Encode(
+          (jsonWebKey! as js_interop.JSArrayBuffer).toDart.asUint8List(),
+        ),
       );
     }
 
@@ -224,7 +228,7 @@ class FlutterSecureStorageWeb extends FlutterSecureStoragePlatform {
     final encoded =
         "${base64Encode(iv)}.${base64Encode(encryptedContent.toDart.asUint8List())}";
 
-    web.window.localStorage["${options[_publicKey]!}.$key"] = encoded;
+    web.window.localStorage.setItem("${options[_publicKey]!}.$key", encoded);
   }
 
   Future<String?> _decryptValue(
