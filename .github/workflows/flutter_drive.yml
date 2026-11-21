@@ -123,6 +123,8 @@ jobs:
         # The flutter tool sometimes never picks up the launched app's VM service URL and hangs until the cap,
         # then reports "Error waiting for a debug connection: The log reader failed unexpectedly". Only that
         # failure is retried, once, on a rebooted simulator; any other failure fails the step at once.
+        # It is flutter/flutter#181771 (the tool can launch the app before `log stream` is ready), fixed by
+        # flutter/flutter#193142 in 3.51; drop the retry once CI runs a Flutter stable that has the fix.
         run: |
           for attempt in 1 2; do
             perl -e '$t = shift; $p = fork; if (!$p) { setpgrp; exec @ARGV or die "exec: $!" }
