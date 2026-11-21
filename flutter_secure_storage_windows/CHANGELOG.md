@@ -1,3 +1,6 @@
+## 3.1.2+vespr.2
+* Lint and deprecation fixes on Flutter 3.50 (shipped with `flutter_secure_storage` 9.2.4+vespr.2, tag `v9.2.4+vespr.2`). Behaviour is unchanged. The pubspec version is unchanged.
+
 ## 3.1.2+vespr.1
 * Supports win32 6 (`win32: ^6.0.1`), with call sites adapted. The pubspec version is unchanged.
 
