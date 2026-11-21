@@ -77,12 +77,10 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
-          # Target the emulator explicitly so the test never falls back to the Linux desktop device.
-          # Cap the run so a hung install/launch fails with logs instead of hitting the job timeout.
-          # On failure, print the relevant logcat lines (plugin/keystore/install errors) to aid debugging.
-          script: |
-            adb logcat -c || true
-            timeout 600 flutter test integration_test -d emulator-5554 || { adb logcat -d -v time | grep -iE 'flutter|securestorage|sharedpref|keystore|tink|crypto|AndroidRuntime|FATAL|PackageManager|installd|dex2oat' | tail -n 400; exit 1; }
+          # The script targets the emulator explicitly, so the test never falls back to the Linux desktop device.
+          # It caps each attempt at 5 min, retries once only when an attempt hits that cap (the API 34 hang after
+          # install), and prints the relevant logcat lines (plugin/keystore/install errors) on failure.
+          script: bash ../../.github/scripts/android_integration_test.sh
           working-directory: flutter_secure_storage/example
   drive_ios:
     name: iOS

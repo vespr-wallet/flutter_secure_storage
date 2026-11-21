@@ -3,6 +3,7 @@
 * Tooling: the Android and iOS integration tests run on the Flutter 3.51 beta (`3.51.0-0.2.pre`). On Flutter 3.50 the tool often hung after launching the app, with the app's Dart VM service listening but the tool never attaching (on iOS that is flutter/flutter#181771, fixed in 3.51 by flutter/flutter#193142; on Android API 34 the cause is not confirmed). The iOS test cap is now 12 minutes. The analysis and unit-test CI stays on 3.50 stable, and the package code is unchanged.
 * Tooling: the analysis and unit-test CI runs on Flutter 3.50.1 stable instead of 3.50.0; the integration tests stay on the 3.51 beta. The package code is unchanged.
 * Tooling: the iOS integration test boots the iPhone 17 simulator on the newest iOS runtime the runner has, so exactly one simulator matches instead of three and the choice no longer depends on `simctl list` order. The package code is unchanged.
+* Tooling: the Android integration test retries once, on the same emulator, when it hangs after install. On API 34 the app's activity sometimes starts a second time a few seconds after launch, and the tool then waits forever on the first test isolate. Each attempt is now capped at 5 minutes instead of 10 (passing runs take about 2), and only an attempt that hits the cap is retried, after uninstalling the app so the retry starts from clean storage. The package code is unchanged.
 
 ## 9.2.4+vespr.2
 VESPR fork release on the 9.x line (tag `v9.2.4+vespr.2`). The pubspec version is unchanged.
