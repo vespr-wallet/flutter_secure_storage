@@ -1,5 +1,5 @@
 ## Unreleased
-* Tooling: the iOS integration test is capped at 15 minutes and prints the simulator log on failure, the integration test runs on pushes to `vespr/9.x` (it pointed at a `develop` branch the fork does not have), and the melos setup steps quote `$GITHUB_PATH`. The package code is unchanged.
+* Tooling: the iOS integration test is capped at 15 minutes and prints the simulator log on failure, the integration test runs on pushes to `vespr/9.x` (it pointed at a `develop` branch the fork does not have), the melos setup steps quote `$GITHUB_PATH`, and the example app no longer calls `setState` after dispose when a `readAll` finishes late (it failed the Android API 26 integration test once). The package code is unchanged.
 
 ## 9.2.4+vespr.2
 VESPR fork release on the 9.x line (tag `v9.2.4+vespr.2`). The pubspec version is unchanged.
