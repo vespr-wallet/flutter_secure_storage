@@ -1,3 +1,6 @@
+## Unreleased
+* Tooling: the iOS integration test is capped at 15 minutes and prints the simulator log on failure, the integration test runs on pushes to `vespr/9.x` (it pointed at a `develop` branch the fork does not have), and the melos setup steps quote `$GITHUB_PATH`. The package code is unchanged.
+
 ## 9.2.4+vespr.2
 VESPR fork release on the 9.x line (tag `v9.2.4+vespr.2`). The pubspec version is unchanged.
 * [Android] The plugin compiles its Java sources for Java 17 instead of Java 8 (`sourceCompatibility`/`targetCompatibility`), which removes the "source value 8 is obsolete" build warnings. Build configuration only; storage behaviour is unchanged.
