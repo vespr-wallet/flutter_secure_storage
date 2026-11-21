@@ -1,6 +1,7 @@
 ## Unreleased
 * Tooling: the iOS integration test is capped at 15 minutes and prints the simulator log on failure, the integration test runs on pushes to `vespr/9.x` (it pointed at a `develop` branch the fork does not have), the melos setup steps quote `$GITHUB_PATH`, and the example app no longer calls `setState` after dispose when a `readAll` finishes late (it failed the Android API 26 integration test once). The package code is unchanged.
 * Tooling: the Android and iOS integration tests run on the Flutter 3.51 beta (`3.51.0-0.2.pre`). On Flutter 3.50 the tool often hung after launching the app, with the app's Dart VM service listening but the tool never attaching (on iOS that is flutter/flutter#181771, fixed in 3.51 by flutter/flutter#193142; on Android API 34 the cause is not confirmed). The iOS test cap is now 12 minutes. The analysis and unit-test CI stays on 3.50 stable, and the package code is unchanged.
+* Tooling: the analysis and unit-test CI runs on Flutter 3.50.1 stable instead of 3.50.0; the integration tests stay on the 3.51 beta. The package code is unchanged.
 
 ## 9.2.4+vespr.2
 VESPR fork release on the 9.x line (tag `v9.2.4+vespr.2`). The pubspec version is unchanged.
