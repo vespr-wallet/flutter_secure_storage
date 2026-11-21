@@ -84,7 +84,8 @@ jobs:
   drive_ios:
     name: iOS
     runs-on: macos-latest
-    timeout-minutes: 30
+    # About 11 min of setup and simulator boot, then up to two 12 min test attempts plus a reboot.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
@@ -116,16 +117,26 @@ jobs:
         env:
           UDID: ${{ steps.simulator.outputs.udid }}
         # Target the simulator explicitly so the test never falls back to the macOS desktop device.
-        # Cap the run so a hung install/launch fails with logs instead of hitting the job timeout
+        # Cap each attempt at 12 min so a hung install/launch fails with logs instead of hitting the job timeout
         # (macOS has no `timeout`, so perl runs the test in its own process group and kills that).
         # On failure, print the simulator's log lines for the app and app installs.
+        # The flutter tool sometimes never picks up the launched app's VM service URL and hangs until the cap,
+        # then reports "Error waiting for a debug connection: The log reader failed unexpectedly". Only that
+        # failure is retried, once, on a rebooted simulator; any other failure fails the step at once.
         run: |
-          perl -e '$t = shift; $p = fork; if (!$p) { setpgrp; exec @ARGV or die "exec: $!" }
-            $SIG{ALRM} = sub { print STDERR "Timed out after ${t}s\n"; kill "TERM", -$p; sleep 10; kill "KILL", -$p; exit 124 };
-            alarm $t; waitpid $p, 0; exit($? & 127 ? 128 + ($? & 127) : $? >> 8)' \
-            900 flutter test integration_test -d "$UDID" || {
-            xcrun simctl spawn "$UDID" log show --last 20m --style compact \
+          for attempt in 1 2; do
+            perl -e '$t = shift; $p = fork; if (!$p) { setpgrp; exec @ARGV or die "exec: $!" }
+              $SIG{ALRM} = sub { print STDERR "Timed out after ${t}s\n"; kill "TERM", -$p; sleep 10; kill "KILL", -$p; exit 124 };
+              alarm $t; waitpid $p, 0; exit($? & 127 ? 128 + ($? & 127) : $? >> 8)' \
+              720 flutter test integration_test -d "$UDID" 2>&1 | tee "$RUNNER_TEMP/ios-test.log" && exit 0
+            xcrun simctl spawn "$UDID" log show --last 15m --style compact \
               --predicate 'process == "Runner" OR process == "installcoordinationd" OR process == "installd" OR eventMessage CONTAINS "com.itnomads.example"' \
               | tail -n 400 || true
-            exit 1
-          }
+            if [ "$attempt" = 2 ] || ! grep -qE 'The log reader failed unexpectedly|Error waiting for a debug connection' "$RUNNER_TEMP/ios-test.log"; then
+              exit 1
+            fi
+            echo "::warning::iOS attempt 1 lost the debug connection to the app (Flutter log reader failure); rebooting the simulator and retrying once."
+            xcrun simctl shutdown "$UDID"
+            xcrun simctl boot "$UDID"
+            xcrun simctl bootstatus "$UDID" -b
+          done
