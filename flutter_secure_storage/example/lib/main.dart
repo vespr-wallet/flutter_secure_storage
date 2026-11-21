@@ -48,6 +48,8 @@ class ItemsWidgetState extends State<ItemsWidget> {
       iOptions: _getIOSOptions(),
       aOptions: _getAndroidOptions(),
     );
+    // The read can finish after the widget is gone (the test ends while one is in flight).
+    if (!mounted) return;
     setState(() {
       _items
         ..clear()

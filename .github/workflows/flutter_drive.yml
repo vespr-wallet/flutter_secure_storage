@@ -3,7 +3,7 @@ name: integration test
 on:
   push:
     branches:
-    - develop
+    - vespr/9.x
   pull_request:
 defaults:
   run:
@@ -60,8 +60,8 @@ jobs:
       - name: Install melos
         run: |
           flutter pub global activate melos
-          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-          echo "$HOME/AppData/Local/Pub/Cache/bin" >> $GITHUB_PATH
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+          echo "$HOME/AppData/Local/Pub/Cache/bin" >> "$GITHUB_PATH"
       - name: Initialize workspace through melos
         run: melos bootstrap
       # Do the heavy first Gradle/NDK build before the emulator boots, so it doesn't compete with it for CPU.
@@ -94,8 +94,8 @@ jobs:
       - name: Install melos
         run: |
           flutter pub global activate melos
-          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-          echo "$HOME/AppData/Local/Pub/Cache/bin" >> $GITHUB_PATH
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+          echo "$HOME/AppData/Local/Pub/Cache/bin" >> "$GITHUB_PATH"
       - name: Initialize workspace through melos
         run: melos bootstrap
       # Run the project migrations (SPM, deployment target) and the first Xcode build before the
@@ -113,5 +113,19 @@ jobs:
         run: xcrun simctl bootstatus ${{ steps.simulator.outputs.udid }} -b
       - name: Run Flutter Integration tests
         working-directory: flutter_secure_storage/example
+        env:
+          UDID: ${{ steps.simulator.outputs.udid }}
         # Target the simulator explicitly so the test never falls back to the macOS desktop device.
-        run: flutter test integration_test -d ${{ steps.simulator.outputs.udid }}
+        # Cap the run so a hung install/launch fails with logs instead of hitting the job timeout
+        # (macOS has no `timeout`, so perl runs the test in its own process group and kills that).
+        # On failure, print the simulator's log lines for the app and app installs.
+        run: |
+          perl -e '$t = shift; $p = fork; if (!$p) { setpgrp; exec @ARGV or die "exec: $!" }
+            $SIG{ALRM} = sub { print STDERR "Timed out after ${t}s\n"; kill "TERM", -$p; sleep 10; kill "KILL", -$p; exit 124 };
+            alarm $t; waitpid $p, 0; exit($? & 127 ? 128 + ($? & 127) : $? >> 8)' \
+            900 flutter test integration_test -d "$UDID" || {
+            xcrun simctl spawn "$UDID" log show --last 20m --style compact \
+              --predicate 'process == "Runner" OR process == "installcoordinationd" OR process == "installd" OR eventMessage CONTAINS "com.itnomads.example"' \
+              | tail -n 400 || true
+            exit 1
+          }
