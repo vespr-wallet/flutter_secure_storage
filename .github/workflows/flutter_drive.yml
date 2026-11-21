@@ -43,10 +43,13 @@ jobs:
           large-packages: true
           swap-storage: true
       - uses: actions/checkout@v7
+      # This fork's integration tests run on the 3.51 beta: on Flutter 3.50 the API 34 run often hangs after
+      # install with the app's VM service listening but the tool never attaching (as on iOS below).
+      # Go back to stable once a 3.51 stable is out.
       - uses: subosito/flutter-action@v2
         with:
-          channel: stable
-          flutter-version: 3.50.0
+          channel: beta
+          flutter-version: 3.51.0-0.2.pre
       - uses: actions/setup-java@v6
         with:
           distribution: "temurin"
