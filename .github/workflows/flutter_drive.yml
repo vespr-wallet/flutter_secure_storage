@@ -109,11 +109,22 @@ jobs:
       - name: Build example iOS app
         working-directory: flutter_secure_storage/example
         run: flutter build ios --simulator --debug
+      # The image ships several iOS runtimes with an iPhone 17, and the action takes the first match in
+      # `simctl list` order. Ask for the newest of them, so exactly one device matches and the pick follows
+      # image updates (a hard-coded version would break as soon as the image drops that runtime).
+      - name: Find the newest iOS runtime with an iPhone 17
+        id: ios_runtime
+        run: |
+          version=$(xcrun simctl list devices available --json | jq -r '.devices | to_entries[]
+            | select(.key | test("SimRuntime\\.iOS-")) | select(any(.value[]; .name == "iPhone 17"))
+            | .key | capture("iOS-(?<v>[0-9-]+)$").v | gsub("-"; ".")' | sort -V | tail -n 1)
+          echo "Newest iOS runtime with an iPhone 17: ${version:?none found}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - uses: futureware-tech/simulator-action@v6
         id: simulator
         with:
           os: iOS
-          os_version: ">=18.1"
+          os_version: "~${{ steps.ios_runtime.outputs.version }}"
           model: "iPhone 17"
       - name: Wait for the simulator to finish booting
         run: xcrun simctl bootstatus ${{ steps.simulator.outputs.udid }} -b
