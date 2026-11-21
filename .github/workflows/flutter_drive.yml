@@ -92,6 +92,14 @@ jobs:
         with:
           channel: stable
           flutter-version: 3.50.0
+      # Flutter 3.50 can launch the app before its simulator `log stream` is ready and then never sees the
+      # VM service URL (flutter/flutter#181771). Apply the upstream fix (flutter/flutter#193142, in 3.51)
+      # to the tool; removing the stamp makes the next `flutter` call rebuild it. Drop on Flutter 3.51+.
+      - name: Patch the Flutter tool with flutter/flutter#193142
+        run: |
+          git -C "$FLUTTER_ROOT" apply "$GITHUB_WORKSPACE/.github/patches/flutter-193142-simulator-log-stream.diff"
+          rm -f "$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"
+          flutter --version
       - name: Install melos
         run: |
           flutter pub global activate melos
@@ -123,8 +131,8 @@ jobs:
         # The flutter tool sometimes never picks up the launched app's VM service URL and hangs until the cap,
         # then reports "Error waiting for a debug connection: The log reader failed unexpectedly". Only that
         # failure is retried, once, on a rebooted simulator; any other failure fails the step at once.
-        # It is flutter/flutter#181771 (the tool can launch the app before `log stream` is ready), fixed by
-        # flutter/flutter#193142 in 3.51; drop the retry once CI runs a Flutter stable that has the fix.
+        # That is flutter/flutter#181771, patched in above; the retry is a fallback in case the patch is not
+        # enough. Drop both once CI runs a Flutter stable with flutter/flutter#193142 (3.51+).
         run: |
           for attempt in 1 2; do
             perl -e '$t = shift; $p = fork; if (!$p) { setpgrp; exec @ARGV or die "exec: $!" }
