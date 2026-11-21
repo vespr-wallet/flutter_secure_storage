@@ -1,4 +1,6 @@
-## Unreleased
+## 9.2.4+vespr.2
+VESPR fork release on the 9.x line (tag `v9.2.4+vespr.2`). The pubspec version is unchanged.
+* [Android] The plugin compiles its Java sources for Java 17 instead of Java 8 (`sourceCompatibility`/`targetCompatibility`), which removes the "source value 8 is obsolete" build warnings. Build configuration only; storage behaviour is unchanged.
 * Tooling: CI runs on Flutter 3.47, and the example app builds with the matching Android Gradle setup. The package code is unchanged.
 * Tooling: CI runs on Flutter 3.50.0, with `actions/checkout@v7`, `actions/setup-java@v6`, `futureware-tech/simulator-action@v6` and `actions/stale@v11`.
 * Tooling: CI lint fails on info-level issues too, and the workspace is clean on Flutter 3.50.0: mechanical lint and deprecation fixes in this package, `flutter_secure_storage_platform_interface`, `flutter_secure_storage_web` (`Storage.getItem`/`setItem` instead of the deprecated `[]`/`[]=`, which call them) and `flutter_secure_storage_windows`, and the example apps import `package:material_ui`. The example app builds with Gradle 9.5.0, AGP 9.3.1 and Kotlin 2.4.21, as Flutter 3.50 requires. Storage behaviour is unchanged.
