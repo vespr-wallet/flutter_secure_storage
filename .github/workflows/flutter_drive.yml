@@ -43,10 +43,13 @@ jobs:
           large-packages: true
           swap-storage: true
       - uses: actions/checkout@v7
+      # This fork's integration tests run on the 3.51 beta: on Flutter 3.50 the API 34 run often hangs after
+      # install with the app's VM service listening but the tool never attaching (as on iOS below).
+      # Go back to stable once a 3.51 stable is out.
       - uses: subosito/flutter-action@v2
         with:
-          channel: stable
-          flutter-version: 3.50.0
+          channel: beta
+          flutter-version: 3.51.0-0.2.pre
       - uses: actions/setup-java@v6
         with:
           distribution: "temurin"
@@ -87,10 +90,13 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
+      # This fork's iOS integration test only runs on the 3.51 beta: Flutter 3.50 stable can launch the app
+      # before the simulator `log stream` is ready and never see the VM service URL (flutter/flutter#181771,
+      # fixed by flutter/flutter#193142 in 3.51). Go back to stable once a 3.51 stable is out.
       - uses: subosito/flutter-action@v2
         with:
-          channel: stable
-          flutter-version: 3.50.0
+          channel: beta
+          flutter-version: 3.51.0-0.2.pre
       - name: Install melos
         run: |
           flutter pub global activate melos
@@ -116,14 +122,14 @@ jobs:
         env:
           UDID: ${{ steps.simulator.outputs.udid }}
         # Target the simulator explicitly so the test never falls back to the macOS desktop device.
-        # Cap the run so a hung install/launch fails with logs instead of hitting the job timeout
+        # Cap the run at 12 min so a hung install/launch fails with logs instead of hitting the job timeout
         # (macOS has no `timeout`, so perl runs the test in its own process group and kills that).
         # On failure, print the simulator's log lines for the app and app installs.
         run: |
           perl -e '$t = shift; $p = fork; if (!$p) { setpgrp; exec @ARGV or die "exec: $!" }
             $SIG{ALRM} = sub { print STDERR "Timed out after ${t}s\n"; kill "TERM", -$p; sleep 10; kill "KILL", -$p; exit 124 };
             alarm $t; waitpid $p, 0; exit($? & 127 ? 128 + ($? & 127) : $? >> 8)' \
-            900 flutter test integration_test -d "$UDID" || {
+            720 flutter test integration_test -d "$UDID" || {
             xcrun simctl spawn "$UDID" log show --last 20m --style compact \
               --predicate 'process == "Runner" OR process == "installcoordinationd" OR process == "installd" OR eventMessage CONTAINS "com.itnomads.example"' \
               | tail -n 400 || true
