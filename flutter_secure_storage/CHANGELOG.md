@@ -4,6 +4,7 @@
 * Tooling: the analysis and unit-test CI runs on Flutter 3.50.1 stable instead of 3.50.0; the integration tests stay on the 3.51 beta. The package code is unchanged.
 * Tooling: the iOS integration test boots the iPhone 17 simulator on the newest iOS runtime the runner has, so exactly one simulator matches instead of three and the choice no longer depends on `simctl list` order. The package code is unchanged.
 * Tooling: the Android integration test retries once, on the same emulator, when it hangs after install. On API 34 the app's activity sometimes starts a second time a few seconds after launch, and the tool then waits forever on the first test isolate. Each attempt is now capped at 5 minutes instead of 10 (passing runs take about 2), and only an attempt that hits the cap is retried, after uninstalling the app so the retry starts from clean storage. The package code is unchanged.
+* Tooling: the example app targets Android SDK 36 (`flutter.targetSdkVersion`, was 34) and iOS 15.0 (was 12.0), matching Flutter 3.50's app template, and commits the iOS migrations Flutter 3.50 applies on every build (Swift Package Manager plugin integration, UIScene lifecycle, `MinimumOSVersion` removed from `AppFrameworkInfo.plist`) and the regenerated desktop plugin registrants. The package code is unchanged.
 
 ## 9.2.4+vespr.2
 VESPR fork release on the 9.x line (tag `v9.2.4+vespr.2`). The pubspec version is unchanged.
